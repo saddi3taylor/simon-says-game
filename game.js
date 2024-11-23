@@ -29,7 +29,9 @@ class SimonGame extends GameEntity {
         this.gameHistory = JSON.parse(localStorage.getItem('gameHistory')) || []; // Load from localStorage
         this.saveScoreOnce = false; // Prevents multiple score saves per game
         this.colorIndex = 0;
+        this.countdownInterval = null; // tracker for countdown interval
     }
+
 
     nextSequence() {
         this.userClickedPattern = [];
@@ -130,18 +132,20 @@ class SimonGame extends GameEntity {
 
     startCountdown() {
         let countdown = 3;
+        this.gameStarted = false; // Ensure game button press is disabled
         $("#level-title").text("Get Ready...");
-        const countdownInterval = setInterval(() => {
+        this.countdownInterval = setInterval(() => {
             $("#level-title").text(countdown);
             countdown--;
             if (countdown < 0) {
-                clearInterval(countdownInterval);
-                this.gameStarted = true;
+                clearInterval(this.countdownInterval);
+                this.gameStarted = true; // Enable game button press
                 this.startGame();
                 this.nextSequence();
             }
         }, 1000);
     }
+
 
     animateTitles() {
         const colors = ["red", "blue", "green", "yellow"];
@@ -160,13 +164,16 @@ class SimonGame extends GameEntity {
     }
 
     resetGameToStartScreen() {
+        this.gameStarted = false;
         $("body").removeClass("game-over");
         $("#game-over-screen, #game-screen, #help-popup, #history-popup, #session-timeout-popup, #delete-popup, #edit-popup").hide();
         $("#start-screen").show();
         $("#help-button, #game-history-button").hide(); // Hide buttons on start screen
-        this.gamePattern = []; // Clear game pattern on reset
-        this.userClickedPattern = []; // Clear user pattern on reset
+        this.gamePattern = [];
+        this.userClickedPattern = [];
+        clearInterval(this.countdownInterval); // Ensure countdown interval is cleared
     }
+
 }
 
 // Event handlers
